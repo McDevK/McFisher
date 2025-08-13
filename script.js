@@ -138,7 +138,7 @@
     for (let i = 0; i < n; i++) {
       const name = state.loot[i];
       const src = `./assets/icons/fishes/${name}.webp`;
-      slots[i].innerHTML = `<img draggable="true" src="${src}" alt="${name}" title="${name}" data-name="${name}" loading="lazy" onerror="this.style.display='none'"/>`;
+      slots[i].innerHTML = `<img draggable="true" src="${src}" alt="${name}" title="${name}" data-name="${name}" onerror="this.style.display='none'"/>`;
       slots[i].classList.add('filled');
     }
 
@@ -787,12 +787,12 @@
         <div class="fish-item ${activeClass}" data-id="${id}">
           <div class="fish-info">
             <button class="complete-btn ${isCompleted ? 'done' : ''}" data-id="${id}" title="标记完成">
-              <img src="${completeIconUrl}" alt="完成" loading="lazy" onerror="this.style.display='none'" />
+              <img src="${completeIconUrl}" alt="完成" onerror="this.style.display='none'" />
             </button>
             <button class="pin-btn ${isPinned ? 'on' : ''}" data-id="${id}" title="置顶">
-              <img src="${pinIconUrl}" alt="置顶" loading="lazy" onerror="this.style.display='none'" />
+              <img src="${pinIconUrl}" alt="置顶" onerror="this.style.display='none'" />
             </button>
-            <img class="fish-icon" src="${iconUrl}" alt="${fish.name}" loading="lazy" onerror="this.style.display='none'" />
+            <img class="fish-icon" src="${iconUrl}" alt="${fish.name}" onerror="this.style.display='none'" />
             <div class="fish-name"><span class="fish-name-text">${fish.name}</span>${collectIcon}</div>
             <div class="fish-tags">${timeTag}${weatherTag}</div>
           </div>
@@ -1350,17 +1350,17 @@
     el.fishDetail.innerHTML = `
       <div class="detail-container">
         <div class="detail-card detail-header">
-          <img class="fish-icon lg" src="${iconUrl}" alt="${fish.name}" loading="lazy" onerror="this.style.display='none'" />
+          <img class="fish-icon lg" src="${iconUrl}" alt="${fish.name}" onerror="this.style.display='none'" />
           <div class="detail-title">${fish.name}${collectBadge}</div>
           <div class="detail-actions">
             <button class="spoil-btn" title="战利品">
-              <img src="./assets/icons/button/spoil.webp" alt="战利品" loading="lazy" onerror="this.style.display='none'" />
+              <img src="./assets/icons/button/spoil.webp" alt="战利品" onerror="this.style.display='none'" />
             </button>
             <button class="complete-btn ${isCompleted ? 'done' : ''}" data-id="${id}" title="标记完成">
-              <img src="${completeIconUrl}" alt="完成" loading="lazy" onerror="this.style.display='none'" />
+              <img src="${completeIconUrl}" alt="完成" onerror="this.style.display='none'" />
             </button>
             <button class="pin-btn ${isPinned ? 'on' : ''}" data-id="${id}" title="置顶">
-              <img src="${pinIconUrl}" alt="置顶" loading="lazy" onerror="this.style.display='none'" />
+              <img src="${pinIconUrl}" alt="置顶" onerror="this.style.display='none'" />
             </button>
           </div>
         </div>
@@ -1370,7 +1370,7 @@
             <div class="field-row"><span class="tag">等级</span> <strong>${fish.level ?? '—'}</strong></div>
             <div class="field-row"><span class="tag">时间</span> <span class="tag tag-time">${timeText}</span></div>
             <div class="field-row"><span class="tag">天气</span> ${weatherTags || '无'}</div>
-            ${fish.rod ? `<div class="field-row"><span class="tag">杆型</span> <img class="rod-icon meta-icon" style="image-rendering:auto;" src="./assets/icons/type/${rodIconMap[fish.rod] || ''}" alt="${fish.rod}" loading="lazy" onerror="this.style.display='none'"/> ${fish.rod}</div>` : ''}
+            ${fish.rod ? `<div class="field-row"><span class="tag">杆型</span> <img class="rod-icon meta-icon" style="image-rendering:auto;" src="./assets/icons/type/${rodIconMap[fish.rod] || ''}" alt="${fish.rod}" onerror="this.style.display='none'"/> ${fish.rod}</div>` : ''}
             ${fish.hook ? `<div class=\"field-row\"><span class=\"tag\">拉杆</span> <img class=\"hook-icon meta-icon\" src=\"./assets/icons/skill/${hookIconMap[fish.hook] || ''}\" alt=\"${fish.hook}\" loading=\"lazy\" onerror=\"this.style.display='none'\"/> ${fish.hook}</div>` : ''}
             ${(() => {
               const c = String(fish.collectable || '无').trim();

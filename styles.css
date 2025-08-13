@@ -185,7 +185,7 @@ body {
 .complete-btn:active { transform: scale(.95); }
 .complete-btn.done img { filter: hue-rotate(85deg) saturate(1.8) brightness(1.12) contrast(1.12); }
 [data-theme="light"] .complete-btn.done img { filter: hue-rotate(85deg) saturate(2) brightness(1.15) contrast(1.2); }
-.fish-icon { width: 28px; height: 28px; border-radius: 6px; border: 1px solid var(--ff14-border); background: var(--ff14-bg-light); object-fit: cover; flex: 0 0 auto; box-shadow: 0 1px 4px var(--ff14-shadow); transition: opacity 0.3s ease; }
+.fish-icon { width: 28px; height: 28px; border-radius: 6px; border: 1px solid var(--ff14-border); background: var(--ff14-bg-light); object-fit: cover; flex: 0 0 auto; box-shadow: 0 1px 4px var(--ff14-shadow); }
 .fish-icon.lg { width: 64px; height: 64px; border-radius: 10px; }
 .fish-icon.sm { width: 20px; height: 20px; border-radius: 4px; }
 .fish-icon, .bait-icon { background-color: transparent; }
@@ -324,6 +324,14 @@ body {
   /* 战利品：移动端仅显示 7x2 共14格 */
   .cert-loot-grid { grid-template-columns: repeat(7, 1fr); }
   .cert-loot-grid .cert-loot-item:nth-child(n+15) { display: none; }
+  
+  /* 移动端图标优化：防止闪烁 */
+  .fish-icon, .bait-icon, .weather-icon, .collect-badge {
+    will-change: auto;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    image-rendering: auto;
+  }
 }
 
 /* 移动端圆形头像尺寸更大一些，靠容器自适应 */
