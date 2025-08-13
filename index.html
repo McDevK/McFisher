@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>McFisher - 钓鱼笔记</title>
-  <link rel="icon" type="image/webp" sizes="32x32" href="./assets/icons/favicon/favicon.png">
+  <link rel="icon" type="image/webp" sizes="32x32" href="./assets/icons/favicon/favicon.webp">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <link rel="stylesheet" href="./styles.css" />
@@ -135,13 +135,13 @@
           <!-- 移动端：圆形头像（独立上传与裁剪） -->
           <div class="avatar-mobile-box" aria-hidden="true">
             <div class="avatar-mobile-wrap" title="点击修改头像（移动端）">
-              <img id="userAvatarMobile" class="avatar mobile" alt="Avatar" src="./assets/icons/others/profile.png" onerror="this.onerror=null; this.src='./assets/icons/others/profile.png'" />
+              <img id="userAvatarMobile" class="avatar mobile" alt="Avatar" src="./assets/icons/others/profile.webp" onerror="this.onerror=null; this.src='./assets/icons/others/profile.webp'" />
               <input id="avatarFileMobile" type="file" accept="image/*" hidden />
             </div>
           </div>
           <div class="user-profile">
             <div class="avatar-wrap" title="点击修改头像">
-              <img id="userAvatar" class="avatar" alt="Avatar" src="./assets/icons/others/profile.png" onerror="this.onerror=null; this.src='./assets/icons/others/profile.png'" />
+              <img id="userAvatar" class="avatar" alt="Avatar" src="./assets/icons/others/profile.webp" onerror="this.onerror=null; this.src='./assets/icons/others/profile.webp'" />
               <input id="avatarFile" type="file" accept="image/*" hidden />
             </div>
             <div class="user-card-meta">
@@ -168,7 +168,7 @@
           <h2><i class="fas fa-clock"></i> 现在可钓</h2>
           <div class="search-box">
             <button class="filter-btn" id="filterBtn" title="筛选">
-              <img src="./assets/icons/button/filter.png" alt="筛选" onerror="this.style.display='none'" />
+              <img src="./assets/icons/button/filter.webp" alt="筛选" onerror="this.style.display='none'" />
             </button>
             <input type="text" id="fishSearch" placeholder="搜索鱼名/鱼饵/钓场...">
             <i class="fas fa-search"></i>
@@ -220,6 +220,7 @@
     </div>
   </footer>
 
+  <script src="./performance.js"></script>
   <script src="./script.js"></script>
   <script>
     // 注册 Service Worker

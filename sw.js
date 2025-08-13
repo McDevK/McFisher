@@ -5,12 +5,13 @@ const STATIC_CACHE = [
   './index.html',
   './styles.css',
   './script.js',
-  './assets/icons/others/profile.png',
-  './assets/icons/others/complete.png',
-  './assets/icons/others/settop_on.png',
-  './assets/icons/others/settop_off.png',
-  './assets/icons/others/spoil.png',
-  './assets/icons/others/collection.png'
+  './performance.js',
+  './assets/icons/others/profile.webp',
+  './assets/icons/others/complete.webp',
+  './assets/icons/button/settop_on.webp',
+  './assets/icons/button/settop_off.webp',
+  './assets/icons/button/spoil.webp',
+  './assets/icons/others/collection.webp'
 ];
 
 // 安装事件 - 预缓存关键资源

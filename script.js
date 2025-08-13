@@ -81,7 +81,7 @@
     const n = Math.min(slots.length, state.loot.length);
     for (let i = 0; i < n; i++) {
       const name = state.loot[i];
-      const src = `./assets/icons/fishes/${encodeURIComponent(name)}.png`;
+      const src = `./assets/icons/fishes/${name}.webp`;
       slots[i].innerHTML = `<img draggable="true" src="${src}" alt="${name}" title="${name}" data-name="${name}" loading="lazy" onerror="this.style.display='none'"/>`;
       slots[i].classList.add('filled');
     }
@@ -536,12 +536,12 @@
   // 预加载关键图片
   function preloadCriticalImages() {
     const criticalImages = [
-      './assets/icons/others/profile.png',
-      './assets/icons/others/complete.png',
-      './assets/icons/others/settop_on.png',
-      './assets/icons/others/settop_off.png',
-      './assets/icons/others/spoil.png',
-      './assets/icons/others/collection.png'
+      './assets/icons/others/profile.webp',
+      './assets/icons/button/complete.webp',
+      './assets/icons/button/settop_on.webp',
+      './assets/icons/button/settop_off.webp',
+      './assets/icons/button/spoil.webp',
+      './assets/icons/others/collection.webp'
     ];
     
     return Promise.all(criticalImages.map(src => {
@@ -553,18 +553,19 @@
     }));
   }
 
-  // 异步加载鱼类图片
+
+
+  // 简化的图片预加载
   function preloadFishImages(fishData) {
-    const imagePromises = fishData.slice(0, 20).map(fish => {
-      return new Promise((resolve) => {
-        const img = new Image();
-        img.onload = img.onerror = () => resolve();
-        img.src = `./assets/icons/fishes/${fish.name}.png`;
-      });
+    // 预加载前10条鱼的图片
+    const criticalFish = fishData.slice(0, 10);
+    criticalFish.forEach(fish => {
+      const img = new Image();
+      img.src = `./assets/icons/fishes/${fish.name}.webp`;
     });
-    // 不阻塞主流程，背景加载
-    Promise.all(imagePromises).catch(() => {});
   }
+
+
 
   // ---------- 数据加载与渲染 ----------
   async function loadFishData() {
@@ -730,13 +731,13 @@
       const hasTimeLimit = !!timeStr && timeStr !== '无' && !/全天可钓/.test(timeStr);
       const isRestricted = hasWeatherLimit || hasTimeLimit;
       const activeClass = isCompleted ? 'completed' : ((cd.active && isRestricted) ? 'active' : '');
-      const iconUrl = `./assets/icons/fishes/${encodeURIComponent(fish.name)}.png`;
+      const iconUrl = `./assets/icons/fishes/${fish.name}.webp`;
       const timeBucket = Number.isFinite(cd.msLeft) ? Math.floor(cd.msLeft / 1000) : Number.POSITIVE_INFINITY;
       const isCollectable = String(fish.collectable || '无').trim() !== '无';
-      const collectIcon = isCollectable ? `<img class=\"collect-badge\" src=\"./assets/icons/others/collection.png\" alt=\"collectable\" title=\"Collectable\" loading=\"lazy\" onerror=\"this.style.display='none'\"/>` : '';
-      const completeIconUrl = './assets/icons/button/complete.png';
+      const collectIcon = isCollectable ? `<img class=\"collect-badge\" src=\"./assets/icons/others/collection.webp\" alt=\"collectable\" title=\"Collectable\" loading=\"lazy\" onerror=\"this.style.display='none'\"/>` : '';
+      const completeIconUrl = './assets/icons/button/complete.webp';
       const isPinned = state.pinned.has(id);
-      const pinIconUrl = isPinned ? './assets/icons/button/settop_on.png' : './assets/icons/button/settop_off.png';
+      const pinIconUrl = isPinned ? './assets/icons/button/settop_on.webp' : './assets/icons/button/settop_off.webp';
       const html = `
         <div class="fish-item ${activeClass}" data-id="${id}">
           <div class="fish-info">
@@ -900,9 +901,9 @@
     }
 
     const methods = Array.isArray(fish.methods) ? fish.methods : [];
-    const iconUrl = `./assets/icons/fishes/${encodeURIComponent(fish.name)}.png`;
-    const rodIconMap = { '轻杆': 'light.png', '中杆': 'middle.png', '鱼王杆': 'heavy.png' };
-    const hookIconMap = { '精准提钩': 'Precision Hookset.png', '强力提钩': 'Powerful Hookset.png' };
+    const iconUrl = `./assets/icons/fishes/${encodeURIComponent(fish.name)}.webp`;
+    const rodIconMap = { '轻杆': 'light.webp', '中杆': 'middle.webp', '鱼王杆': 'heavy.webp' };
+    const hookIconMap = { '精准提钩': 'Precision Hookset.webp', '强力提钩': 'Powerful Hookset.webp' };
 
     function rodIconFor(name) { return rodIconMap[name] ? `./assets/icons/type/${rodIconMap[name]}` : ''; }
     function hookIconFor(name) { return hookIconMap[name] ? `./assets/icons/skill/${hookIconMap[name]}` : ''; }
@@ -919,7 +920,7 @@
 
       // 直接鱼饵 → 目标鱼
       if (m.type === 'bait') {
-        const baitIcon = m.bait ? `./assets/icons/bait/${encodeURIComponent(m.bait)}.png` : '';
+        const baitIcon = m.bait ? `./assets/icons/bait/${m.bait}.webp` : '';
         if (baitIcon) chainParts.push(`<img class=\"bait-icon\" src=\"${baitIcon}\" title=\"${m.bait}\" alt=\"${m.bait}\" data-tip=\"${m.bait}\" loading=\"lazy\" onerror=\"this.style.display='none'\"/>`);
         chainParts.push(`<span class=\"chain-arrow\">›</span>`);
         chainParts.push(withIndicators(iconUrl, fish, fish.name));
@@ -953,13 +954,13 @@
         // 渲染：对每个小鱼，尽量配上对应的鱼饵；若最外层缺少鱼饵，也继续展示小鱼
         for (let i = 0; i < fishesSeq.length; i++) {
           if (i < baits.length) {
-            const baitIcon = `./assets/icons/bait/${encodeURIComponent(baits[i])}.png`;
+            const baitIcon = `./assets/icons/bait/${baits[i]}.webp`;
             chainParts.push(`<img class=\"bait-icon\" src=\"${baitIcon}\" title=\"${baits[i]}\" alt=\"${baits[i]}\" data-tip=\"${baits[i]}\" loading=\"lazy\" onerror=\"this.style.display='none'\"/>`);
             chainParts.push(`<span class=\"chain-arrow\">›</span>`);
           }
           const fishNameNode = fishesSeq[i];
           const fishNode = findFishByName(fishNameNode);
-          const fishIcon = `./assets/icons/fishes/${encodeURIComponent(fishNameNode)}.png`;
+          const fishIcon = `./assets/icons/fishes/${fishNameNode}.webp`;
           chainParts.push(withIndicators(fishIcon, fishNode, fishNameNode));
           chainParts.push(`<span class=\"chain-arrow\">›</span>`);
         }
@@ -973,8 +974,8 @@
     }
 
     // 按钮事件绑定（桌面端容器）
-    bindDetailActionsIn(el.fishDetail, fish);
-
+    // 注意：必须在内容插入到 DOM 之后再绑定事件，否则选择器查询不到按钮，导致点击无效
+    // 先不要绑定，等 HTML 注入后在末尾绑定（见本函数最后）
     const methodLines = methods.map(m => renderMethodChain(m)).filter(Boolean);
     // 计算该鱼涉及的所有地图（按 spots 中映射）
     const maps = [];
@@ -1283,7 +1284,7 @@
       // 取该 spot 对应的 level2 作为地图标题
       const mapMeta = (state.spots.find(s => (s.spot||'') === mapName) || {});
       const mapTitle = mapMeta.level2 || '';
-      const mapImgSrc = `./assets/icons/map/${mapName}.png`;
+      const mapImgSrc = `./assets/icons/map/${mapName}.webp`;
       const allHeader = `<button class=\"toggle-chip\" id=\"toggleAllBtn\" aria-expanded=\"false\"><span class=\"arrow\">▶</span> 全部钓法</button>`;
       const allBlock = `<div class=\"all-block collapsed\" id=\"allMethods\"><div class=\"method-list\">${list.map(x=>renderMethodChain(x)).join('')}</div></div>`;
       const mapBlock = `<div class=\"spot-map\">${mapTitle ? `<div class=\"spot-map-title\">地点：${mapTitle}</div>` : ''}<img class=\"spot-map-img\" src=\"${mapImgSrc}\" alt=\"${mapTitle || mapName}\" loading=\"lazy\" onerror=\"this.style.display='none'\"/></div>`;
@@ -1297,9 +1298,9 @@
     const isCompleted = state.completed.has(id);
     const isPinned = state.pinned.has(id);
     const isCollectable = String(fish.collectable || '无').trim() !== '无';
-    const collectBadge = isCollectable ? `<img class=\"collect-badge\" src=\"./assets/icons/others/collection.png\" alt=\"收藏品\" title=\"收藏品：${fish.collectable}\" loading=\"lazy\" onerror=\"this.style.display='none'\"/>` : '';
-    const completeIconUrl = './assets/icons/button/complete.png';
-    const pinIconUrl = isPinned ? './assets/icons/button/settop_on.png' : './assets/icons/button/settop_off.png';
+    const collectBadge = isCollectable ? `<img class=\"collect-badge\" src=\"./assets/icons/others/collection.webp\" alt=\"收藏品\" title=\"收藏品：${fish.collectable}\" loading=\"lazy\" onerror=\"this.style.display='none'\"/>` : '';
+    const completeIconUrl = './assets/icons/button/complete.webp';
+    const pinIconUrl = isPinned ? './assets/icons/button/settop_on.webp' : './assets/icons/button/settop_off.webp';
 
     el.fishDetail.innerHTML = `
       <div class="detail-container">
@@ -1308,7 +1309,7 @@
           <div class="detail-title">${fish.name}${collectBadge}</div>
           <div class="detail-actions">
             <button class="spoil-btn" title="战利品">
-              <img src="./assets/icons/button/spoil.png" alt="战利品" loading="lazy" onerror="this.style.display='none'" />
+              <img src="./assets/icons/button/spoil.webp" alt="战利品" loading="lazy" onerror="this.style.display='none'" />
             </button>
             <button class="complete-btn ${isCompleted ? 'done' : ''}" data-id="${id}" title="标记完成">
               <img src="${completeIconUrl}" alt="完成" loading="lazy" onerror="this.style.display='none'" />
@@ -1329,7 +1330,7 @@
             ${(() => {
               const c = String(fish.collectable || '无').trim();
               if (c === '大地红票' || c === '大地蓝票') {
-                const icon = `./assets/icons/current/${encodeURIComponent(c)}.png`;
+                const icon = `./assets/icons/current/${c}.webp`;
                 return `<div class=\"field-row\"><span class=\"tag\">收藏品</span> <img class=\"current-icon meta-icon\" src=\"${icon}\" alt=\"${c}\" loading=\"lazy\" onerror=\"this.style.display='none'\"/> ${c}</div>`;
               }
               return `<div class=\"field-row\"><span class=\"tag\">收藏品</span> ${c || '无'}</div>`;
@@ -1346,6 +1347,9 @@
           ${renderForMap(mapsToShow[0] || '')}`}
         </div>
       </div>`;
+
+    // 绑定详情操作按钮（确保 HTML 已经插入 DOM 后再绑定）
+    bindDetailActionsIn(el.fishDetail, fish);
 
     // 标签切换：按地图筛选展示
     if (mapsToShow.length >= 1) {
@@ -1821,12 +1825,12 @@
       if (el.userNickname && nick) el.userNickname.textContent = nick;
       const avatarData = localStorage.getItem('mcfisher-user-avatar') || '';
       if (el.userAvatar) {
-        if (avatarData) el.userAvatar.src = avatarData; else el.userAvatar.src = './assets/icons/profile.png';
+        if (avatarData) el.userAvatar.src = avatarData; else el.userAvatar.src = './assets/icons/profile.webp';
       }
       const avatarMobileData = localStorage.getItem('mcfisher-user-avatar-mobile') || '';
       const userAvatarMobile = document.getElementById('userAvatarMobile');
       if (userAvatarMobile) {
-        if (avatarMobileData) userAvatarMobile.src = avatarMobileData; else userAvatarMobile.src = './assets/icons/profile.png';
+        if (avatarMobileData) userAvatarMobile.src = avatarMobileData; else userAvatarMobile.src = './assets/icons/profile.webp';
       }
       // 战利品读取并渲染
       loadLoot();
@@ -1924,10 +1928,11 @@
     
     // 并行加载关键资源和数据
     try {
-      const [_, __] = await Promise.all([
-        preloadCriticalImages(),
-        loadFishData()
-      ]);
+      // 预加载关键图片（不阻塞）
+      preloadCriticalImages();
+      
+      // 加载数据
+      await loadFishData();
       // 每隔5分钟刷新数据（减少频率提升性能）
       setInterval(loadFishData, 5 * 60 * 1000);
     } catch (err) {

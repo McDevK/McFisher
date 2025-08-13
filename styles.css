@@ -179,7 +179,7 @@ body {
 .complete-btn:active { transform: scale(.95); }
 .complete-btn.done img { filter: hue-rotate(85deg) saturate(1.8) brightness(1.12) contrast(1.12); }
 [data-theme="light"] .complete-btn.done img { filter: hue-rotate(85deg) saturate(2) brightness(1.15) contrast(1.2); }
-.fish-icon { width: 28px; height: 28px; border-radius: 6px; border: 1px solid var(--ff14-border); background: var(--ff14-bg-light); object-fit: cover; flex: 0 0 auto; box-shadow: 0 1px 4px var(--ff14-shadow); }
+.fish-icon { width: 28px; height: 28px; border-radius: 6px; border: 1px solid var(--ff14-border); background: var(--ff14-bg-light); object-fit: cover; flex: 0 0 auto; box-shadow: 0 1px 4px var(--ff14-shadow); transition: opacity 0.3s ease; }
 .fish-icon.lg { width: 64px; height: 64px; border-radius: 10px; }
 .fish-icon.sm { width: 20px; height: 20px; border-radius: 4px; }
 .fish-icon, .bait-icon { background-color: transparent; }
