@@ -223,43 +223,20 @@
   </footer>
 
   <script src="./device-detector.js"></script>
-  <script src="./performance.js"></script>
+  <script src="./image-preloader.js"></script>
   <script src="./script.js"></script>
-      <script>
-      // 注册 Service Worker 并处理更新
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('./sw.js')
-            .then(registration => {
-              console.log('SW registered: ', registration);
-              
-              // 监听更新
-              registration.addEventListener('updatefound', () => {
-                const newWorker = registration.installing;
-                if (newWorker) {
-                  newWorker.addEventListener('statechange', () => {
-                    if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                      // 新版本已安装，提示用户刷新
-                      console.log('New content is available; please refresh.');
-                      // 自动跳过等待
-                      newWorker.postMessage({ action: 'skipWaiting' });
-                    }
-                  });
-                }
-              });
-            })
-            .catch(registrationError => {
-              console.log('SW registration failed: ', registrationError);
-            });
-            
-          // 监听 Service Worker 控制器变化
-          navigator.serviceWorker.addEventListener('controllerchange', () => {
-            // 新 Service Worker 已接管，刷新页面
-            window.location.reload();
-          });
+  <script>
+    // 简化的 Service Worker 注册
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./sw-simple.js')
+        .then(registration => {
+          console.log('SW registered');
+        })
+        .catch(error => {
+          console.log('SW registration failed');
         });
-      }
-    </script>
+    }
+  </script>
 </body>
 </html>
 

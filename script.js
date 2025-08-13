@@ -604,10 +604,11 @@
 
 
 
-  // 图片预加载（Service Worker已缓存所有图片，此函数仅作兼容）
+  // 智能图片预加载
   function preloadFishImages(fishData) {
-    // Service Worker已经预缓存了所有图片，这里无需额外操作
-    console.log('鱼类图片已通过Service Worker预缓存');
+    if (window.imagePreloader && fishData) {
+      window.imagePreloader.smartPreload(fishData);
+    }
   }
 
 
@@ -792,7 +793,7 @@
             <button class="pin-btn ${isPinned ? 'on' : ''}" data-id="${id}" title="置顶">
               <img src="${pinIconUrl}" alt="置顶" onerror="this.style.display='none'" />
             </button>
-            <img class="fish-icon" src="${iconUrl}" alt="${fish.name}" onerror="this.style.display='none'" />
+            <img class="fish-icon" src="${iconUrl}" alt="${fish.name}" style="opacity: 1;" onerror="this.style.display='none'" />
             <div class="fish-name"><span class="fish-name-text">${fish.name}</span>${collectIcon}</div>
             <div class="fish-tags">${timeTag}${weatherTag}</div>
           </div>
@@ -1350,7 +1351,7 @@
     el.fishDetail.innerHTML = `
       <div class="detail-container">
         <div class="detail-card detail-header">
-          <img class="fish-icon lg" src="${iconUrl}" alt="${fish.name}" onerror="this.style.display='none'" />
+          <img class="fish-icon lg" src="${iconUrl}" alt="${fish.name}" style="opacity: 1;" onerror="this.style.display='none'" />
           <div class="detail-title">${fish.name}${collectBadge}</div>
           <div class="detail-actions">
             <button class="spoil-btn" title="战利品">

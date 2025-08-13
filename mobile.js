@@ -515,9 +515,20 @@
     return getWeatherAndTimeCountdown(zoneKey, weatherLabel, timeLabel, now);
   }
 
-  // 图片预加载（移动端无需预加载，Service Worker已缓存）
+  // 移动端轻量级图片预加载
   function preloadCriticalImages() {
-    console.log('移动端：图片已通过Service Worker预缓存');
+    const critical = [
+      './assets/icons/others/profile.webp',
+      './assets/icons/button/complete.webp',
+      './assets/icons/button/spoil.webp',
+      './assets/icons/others/collection.webp'
+    ];
+    
+    critical.forEach(src => {
+      const img = new Image();
+      img.src = src;
+    });
+    
     return Promise.resolve();
   }
 
