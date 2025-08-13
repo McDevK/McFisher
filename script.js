@@ -595,57 +595,19 @@
     return getWeatherAndTimeCountdown(zoneKey, weatherLabel, timeLabel, now);
   }
 
-  // 预加载关键图片
+  // 预加载关键图片（Service Worker已缓存，此函数确保立即可用）
   function preloadCriticalImages() {
-    const criticalImages = [
-      './assets/icons/others/profile.webp',
-      './assets/icons/button/complete.webp',
-      './assets/icons/button/settop_on.webp',
-      './assets/icons/button/settop_off.webp',
-      './assets/icons/button/spoil.webp',
-      './assets/icons/button/setting.webp',
-      './assets/icons/others/collection.webp'
-    ];
-    
-    // 静态图标立即加载，避免闪烁
-    return Promise.all(criticalImages.map(src => {
-      return new Promise((resolve) => {
-        const img = new Image();
-        img.onload = () => resolve(true);
-        img.onerror = () => resolve(false);
-        img.src = src;
-      });
-    }));
+    // Service Worker已经预缓存了所有图片，直接返回成功
+    console.log('关键图片已通过Service Worker预缓存');
+    return Promise.resolve();
   }
 
 
 
-  // 智能鱼类图片预加载（减少闪烁）
+  // 图片预加载（Service Worker已缓存所有图片，此函数仅作兼容）
   function preloadFishImages(fishData) {
-    if (!fishData || fishData.length === 0) return;
-    
-    // 获取当前活跃的鱼（优先级最高）
-    const activeFish = fishData.filter(f => f.active || f.pending).slice(0, 12);
-    const regularFish = fishData.filter(f => !f.active && !f.pending).slice(0, 8);
-    
-    // 分批预加载，避免网络拥塞
-    const preloadBatch = (fishList, delay = 0) => {
-      setTimeout(() => {
-        fishList.forEach((fish, index) => {
-          setTimeout(() => {
-            const img = new Image();
-            img.onerror = () => {
-              // 静默处理错误，避免控制台噪音
-            };
-            img.src = `./assets/icons/fishes/${fish.name}.webp`;
-          }, index * 30); // 错开加载，避免阻塞
-        });
-      }, delay);
-    };
-    
-    // 立即加载活跃鱼类，延迟加载其他
-    preloadBatch(activeFish, 0);
-    preloadBatch(regularFish, 800);
+    // Service Worker已经预缓存了所有图片，这里无需额外操作
+    console.log('鱼类图片已通过Service Worker预缓存');
   }
 
 
