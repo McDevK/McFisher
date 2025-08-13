@@ -603,13 +603,16 @@
       './assets/icons/button/settop_on.webp',
       './assets/icons/button/settop_off.webp',
       './assets/icons/button/spoil.webp',
+      './assets/icons/button/setting.webp',
       './assets/icons/others/collection.webp'
     ];
     
+    // 静态图标立即加载，避免闪烁
     return Promise.all(criticalImages.map(src => {
       return new Promise((resolve) => {
         const img = new Image();
-        img.onload = img.onerror = () => resolve();
+        img.onload = () => resolve(true);
+        img.onerror = () => resolve(false);
         img.src = src;
       });
     }));
@@ -617,14 +620,32 @@
 
 
 
-  // 简化的图片预加载
+  // 智能鱼类图片预加载（减少闪烁）
   function preloadFishImages(fishData) {
-    // 预加载前10条鱼的图片
-    const criticalFish = fishData.slice(0, 10);
-    criticalFish.forEach(fish => {
-      const img = new Image();
-      img.src = `./assets/icons/fishes/${fish.name}.webp`;
-    });
+    if (!fishData || fishData.length === 0) return;
+    
+    // 获取当前活跃的鱼（优先级最高）
+    const activeFish = fishData.filter(f => f.active || f.pending).slice(0, 12);
+    const regularFish = fishData.filter(f => !f.active && !f.pending).slice(0, 8);
+    
+    // 分批预加载，避免网络拥塞
+    const preloadBatch = (fishList, delay = 0) => {
+      setTimeout(() => {
+        fishList.forEach((fish, index) => {
+          setTimeout(() => {
+            const img = new Image();
+            img.onerror = () => {
+              // 静默处理错误，避免控制台噪音
+            };
+            img.src = `./assets/icons/fishes/${fish.name}.webp`;
+          }, index * 30); // 错开加载，避免阻塞
+        });
+      }, delay);
+    };
+    
+    // 立即加载活跃鱼类，延迟加载其他
+    preloadBatch(activeFish, 0);
+    preloadBatch(regularFish, 800);
   }
 
 
@@ -632,7 +653,7 @@
   // ---------- 数据加载与渲染 ----------
   async function loadFishData() {
     const t = Date.now();
-    const res = await fetch(`./assets/fishbook/fish.json`, { cache: 'force-cache' });
+    const res = await fetch(`./assets/fishbook/fish.json`, { cache: 'default' });
     if (!res.ok) throw new Error('Failed to load fish.json');
     state.fish = await res.json();
     
