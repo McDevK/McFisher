@@ -31,6 +31,7 @@
   // ---------- DOM ----------
   const el = {
     themeToggle: document.getElementById('themeToggle'),
+    settingsToggle: document.getElementById('settingsToggle'),
     eorzeaTimeValue: document.getElementById('eorzeaTimeValue'),
     localTimeValue: document.getElementById('localTimeValue'),
     fishSearch: document.getElementById('fishSearch'),
@@ -49,6 +50,61 @@
     avatarFile: document.getElementById('avatarFile'),
     userNickname: document.getElementById('userNickname')
   };
+
+  // 导入/导出：需要持久化的键集合
+  const EXPORT_KEYS = [
+    'mcfisher-theme',
+    'mcfisher-user-nickname',
+    'mcfisher-user-avatar',
+    'mcfisher-user-avatar-mobile',
+    'mcfisher-cert-id',
+    'mcfisher-issue-date',
+    'mcfisher-user-world',
+    'mcfisher-user-title',
+    // 完成、置顶、战利品、其他以前缀匹配（在导出函数中处理）
+  ];
+
+  function exportLocalData() {
+    const data = {};
+    // 固定键
+    for (const k of EXPORT_KEYS) {
+      try { data[k] = localStorage.getItem(k); } catch(_) {}
+    }
+    // 前缀类键
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (!key) continue;
+      if (key.startsWith('mcfisher-completed-') || key.startsWith('mcfisher-pinned-') || key.startsWith('mcfisher-loot-')) {
+        try { data[key] = localStorage.getItem(key); } catch(_) {}
+      }
+    }
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'mcfisher-backup.json';
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  function importLocalData(file) {
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const obj = JSON.parse(String(reader.result || '{}'));
+        Object.keys(obj).forEach(k => {
+          try { localStorage.setItem(k, obj[k]); } catch(_) {}
+        });
+        // 重新载入状态
+        loadPreferences();
+        renderFishList();
+        renderFishDetail();
+        alert('数据已导入');
+      } catch (e) {
+        alert('导入失败：文件格式错误');
+      }
+    };
+    reader.readAsText(file);
+  }
 
   // ---------- 时间/格式化 ----------
   function getEorzeaNow(nowMs) {
@@ -1432,6 +1488,48 @@
       el.themeToggle.querySelector('i').className = state.theme === 'dark' ? 'fas fa-moon' : 'fas fa-sun';
       localStorage.setItem('mcfisher-theme', state.theme);
     });
+
+    if (el.settingsToggle) {
+      el.settingsToggle.addEventListener('click', () => {
+        // 设置菜单：导出 / 导入（垂直排列，纯色底，高层级）
+        const menu = document.createElement('div');
+        menu.style.position = 'fixed';
+        menu.style.top = '72px';
+        menu.style.right = '18px';
+        // 纯色底：使用主题主色，不透明
+        menu.style.background = 'var(--ff14-primary)';
+        menu.style.opacity = '1';
+        menu.style.backdropFilter = 'none';
+        menu.style.border = '2px solid var(--ff14-border)';
+        menu.style.borderRadius = '12px';
+        menu.style.boxShadow = '0 14px 34px rgba(0,0,0,.28)';
+        menu.style.padding = '12px';
+        menu.style.zIndex = '2147483647';
+        menu.style.minWidth = '180px';
+        menu.innerHTML = `
+          <div style="display:flex; flex-direction:column; gap:10px;">
+            <button id="mcf-export" class="btn btn-primary">导出本地数据</button>
+            <button id="mcf-import" class="btn btn-secondary">导入本地数据</button>
+          </div>
+        `;
+        document.body.appendChild(menu);
+        const close = () => menu.remove();
+        setTimeout(() => document.addEventListener('click', (ev) => {
+          if (!menu.contains(ev.target) && ev.target !== el.settingsToggle) close();
+        }, { once: true }), 0);
+        menu.querySelector('#mcf-export').onclick = () => { exportLocalData(); close(); };
+        menu.querySelector('#mcf-import').onclick = () => { const f = document.getElementById('importDataInput'); if (f) f.click(); close(); };
+      });
+    }
+
+    const importInput = document.getElementById('importDataInput');
+    if (importInput) {
+      importInput.addEventListener('change', (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (file) importLocalData(file);
+        importInput.value = '';
+      });
+    }
 
     el.fishSearch.addEventListener('input', (e) => {
       state.searchText = e.target.value || '';

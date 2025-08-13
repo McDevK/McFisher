@@ -40,7 +40,13 @@ body {
 .header-content { max-width: 1400px; margin: 0 auto; padding: 0 20px; height: 70px; display: flex; align-items: center; justify-content: space-between; }
 .logo { display: flex; align-items: center; gap: 10px; color: var(--ff14-secondary); font-weight: 700; font-size: 22px; text-shadow: 0 0 10px var(--ff14-glow); }
 .header-right { display: flex; align-items: center; gap: 12px; }
-.theme-toggle { width: 44px; height: 44px; border-radius: 50%; border: 2px solid var(--ff14-secondary); background: transparent; color: var(--ff14-secondary); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
+[data-theme="dark"] .theme-toggle, [data-theme="dark"] .settings-toggle { border-color: var(--ff14-secondary); }
+.theme-toggle, .settings-toggle { width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--ff14-secondary); background: transparent; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; transition: transform .12s ease; }
+.theme-toggle:hover, .settings-toggle:hover { transform: translateY(-1px) scale(1.06); }
+.theme-toggle i { font-size: 20px; line-height: 1; display: block; }
+.settings-toggle img { width: 20px; height: 20px; object-fit: contain; display: block; filter: brightness(.95) contrast(1.05); }
+[data-theme="dark"] .settings-toggle img { filter: brightness(1.1) contrast(1.1); }
+.theme-toggle { width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--ff14-secondary); background: transparent; color: var(--ff14-secondary); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
 
 .local-time-box { display: inline-flex; flex-direction: column; gap: 2px; align-items: center; justify-content: center; border: 2px solid var(--ff14-border); border-radius: 10px; padding: 6px 10px; }
 .time-row { display: inline-flex; align-items: center; line-height: 1; }

@@ -30,6 +30,8 @@
         <button class="theme-toggle" id="themeToggle" title="切换主题" aria-label="切换主题">
           <i class="fas fa-moon"></i>
         </button>
+        <button class="settings-toggle" id="settingsToggle" title="设置" aria-label="设置"><img src="./assets/icons/button/setting.png" alt="设置" onerror="this.style.display='none'" /></button>
+        <input id="importDataInput" type="file" accept="application/json" hidden />
       </div>
     </div>
   </header>
@@ -222,20 +224,41 @@
 
   <script src="./performance.js"></script>
   <script src="./script.js"></script>
-  <script>
-    // 注册 Service Worker
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js')
-          .then(registration => {
-            console.log('SW registered: ', registration);
-          })
-          .catch(registrationError => {
-            console.log('SW registration failed: ', registrationError);
+      <script>
+      // 注册 Service Worker 并处理更新
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('./sw.js')
+            .then(registration => {
+              console.log('SW registered: ', registration);
+              
+              // 监听更新
+              registration.addEventListener('updatefound', () => {
+                const newWorker = registration.installing;
+                if (newWorker) {
+                  newWorker.addEventListener('statechange', () => {
+                    if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                      // 新版本已安装，提示用户刷新
+                      console.log('New content is available; please refresh.');
+                      // 自动跳过等待
+                      newWorker.postMessage({ action: 'skipWaiting' });
+                    }
+                  });
+                }
+              });
+            })
+            .catch(registrationError => {
+              console.log('SW registration failed: ', registrationError);
+            });
+            
+          // 监听 Service Worker 控制器变化
+          navigator.serviceWorker.addEventListener('controllerchange', () => {
+            // 新 Service Worker 已接管，刷新页面
+            window.location.reload();
           });
-      });
-    }
-  </script>
+        });
+      }
+    </script>
 </body>
 </html>
 
