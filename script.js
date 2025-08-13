@@ -228,11 +228,17 @@
     };
   }
 
-  function renderWeatherTags(cnList) {
+  function renderWeatherTags(cnList, opts = {}) {
     const s = String(cnList || '').trim();
     if (!s || s === '无') return '';
     const parts = s.split(/[;|]/).map(t => t.trim()).filter(t => t && t !== '无');
     if (parts.length === 0) return '';
+    if (opts.mode === 'icon') {
+      return parts.map(p => {
+        const src = `./assets/icons/weather/${p}.png`;
+        return `<img class="weather-icon" src="${src}" alt="${p}" title="${p}" onerror="this.style.display='none'"/>`;
+      }).join('');
+    }
     return parts.map(p => `<span class="tag tag-weather">${p}</span>`).join('');
   }
 
@@ -722,7 +728,7 @@
       const timeStr = String(fish.time || '').trim();
       const showTime = !!timeStr && timeStr !== '无' && !/全天可钓/.test(timeStr);
       const timeTag = showTime ? `<span class="tag tag-time">${timeStr}</span>` : '';
-      const weatherTag = renderWeatherTags(fish.weather);
+      const weatherTag = renderWeatherTags(fish.weather, { mode: 'icon' });
       const klass = cd.active ? 'active' : 'pending';
       const progress = (!isCompleted && cd.active && Number.isFinite(cd.msLeft))
         ? Math.max(0, Math.min(100, (1 - (cd.msLeft / (8 * EORZEA_HOUR_MS))) * 100))
@@ -1779,7 +1785,8 @@
     }
     document.body.addEventListener('mouseover', (e) => {
       const target = e.target;
-      if (target && target.classList && target.classList.contains('bait-icon')) {
+      const isTipTarget = target && target.classList && (target.classList.contains('bait-icon') || target.classList.contains('weather-icon'));
+      if (isTipTarget) {
         const title = target.getAttribute('data-tip') || target.getAttribute('title') || target.getAttribute('alt') || '';
         // 使用 clientX/clientY 与 position:fixed 对齐，避免滚动导致位置异常
         if (title) showTooltip(title, e.clientX, e.clientY);
@@ -1800,7 +1807,8 @@
     });
     document.body.addEventListener('mouseout', (e) => {
       const target = e.target;
-      if (target && target.classList && target.classList.contains('bait-icon')) {
+      const isTipTarget = target && target.classList && (target.classList.contains('bait-icon') || target.classList.contains('weather-icon'));
+      if (isTipTarget) {
         hideTooltip();
       }
     });
