@@ -82,7 +82,7 @@
     for (let i = 0; i < n; i++) {
       const name = state.loot[i];
       const src = `./assets/icons/fishes/${encodeURIComponent(name)}.png`;
-      slots[i].innerHTML = `<img draggable="true" src="${src}" alt="${name}" title="${name}" data-name="${name}" onerror="this.style.display='none'"/>`;
+      slots[i].innerHTML = `<img draggable="true" src="${src}" alt="${name}" title="${name}" data-name="${name}" loading="lazy" onerror="this.style.display='none'"/>`;
       slots[i].classList.add('filled');
     }
 
@@ -533,12 +533,48 @@
     return getWeatherAndTimeCountdown(zoneKey, weatherLabel, timeLabel, now);
   }
 
+  // 预加载关键图片
+  function preloadCriticalImages() {
+    const criticalImages = [
+      './assets/icons/others/profile.png',
+      './assets/icons/others/complete.png',
+      './assets/icons/others/settop_on.png',
+      './assets/icons/others/settop_off.png',
+      './assets/icons/others/spoil.png',
+      './assets/icons/others/collection.png'
+    ];
+    
+    return Promise.all(criticalImages.map(src => {
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = img.onerror = () => resolve();
+        img.src = src;
+      });
+    }));
+  }
+
+  // 异步加载鱼类图片
+  function preloadFishImages(fishData) {
+    const imagePromises = fishData.slice(0, 20).map(fish => {
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = img.onerror = () => resolve();
+        img.src = `./assets/icons/fishes/${fish.name}.png`;
+      });
+    });
+    // 不阻塞主流程，背景加载
+    Promise.all(imagePromises).catch(() => {});
+  }
+
   // ---------- 数据加载与渲染 ----------
   async function loadFishData() {
     const t = Date.now();
-    const res = await fetch(`./assets/fishbook/fish.json`, { cache: 'default' });
+    const res = await fetch(`./assets/fishbook/fish.json`, { cache: 'force-cache' });
     if (!res.ok) throw new Error('Failed to load fish.json');
     state.fish = await res.json();
+    
+    // 异步预加载前20条鱼的图片
+    preloadFishImages(state.fish);
     // 初始化可用选项（按数据）
     const presentRarities = new Set(state.fish.map(f => String(f.rarity || '普通鱼')));
     const presentConditions = new Set(state.fish.map(f => (f.time && /全天可钓/.test(String(f.time))) ? '常驻' : '限时'));
@@ -575,7 +611,7 @@
     }
     // 加载钓场 → 用于天气区映射
     try {
-      const rs = await fetch(`./assets/fishbook/spots.json`, { cache: 'default' });
+      const rs = await fetch(`./assets/fishbook/spots.json`, { cache: 'force-cache' });
       if (rs.ok) state.spots = await rs.json();
     } catch (e) { state.spots = []; }
     applyFilter();
@@ -697,7 +733,7 @@
       const iconUrl = `./assets/icons/fishes/${encodeURIComponent(fish.name)}.png`;
       const timeBucket = Number.isFinite(cd.msLeft) ? Math.floor(cd.msLeft / 1000) : Number.POSITIVE_INFINITY;
       const isCollectable = String(fish.collectable || '无').trim() !== '无';
-      const collectIcon = isCollectable ? `<img class=\"collect-badge\" src=\"./assets/icons/others/collection.png\" alt=\"collectable\" title=\"Collectable\" onerror=\"this.style.display='none'\"/>` : '';
+      const collectIcon = isCollectable ? `<img class=\"collect-badge\" src=\"./assets/icons/others/collection.png\" alt=\"collectable\" title=\"Collectable\" loading=\"lazy\" onerror=\"this.style.display='none'\"/>` : '';
       const completeIconUrl = './assets/icons/button/complete.png';
       const isPinned = state.pinned.has(id);
       const pinIconUrl = isPinned ? './assets/icons/button/settop_on.png' : './assets/icons/button/settop_off.png';
@@ -705,12 +741,12 @@
         <div class="fish-item ${activeClass}" data-id="${id}">
           <div class="fish-info">
             <button class="complete-btn ${isCompleted ? 'done' : ''}" data-id="${id}" title="标记完成">
-              <img src="${completeIconUrl}" alt="完成" onerror="this.style.display='none'" />
+              <img src="${completeIconUrl}" alt="完成" loading="lazy" onerror="this.style.display='none'" />
             </button>
             <button class="pin-btn ${isPinned ? 'on' : ''}" data-id="${id}" title="置顶">
-              <img src="${pinIconUrl}" alt="置顶" onerror="this.style.display='none'" />
+              <img src="${pinIconUrl}" alt="置顶" loading="lazy" onerror="this.style.display='none'" />
             </button>
-            <img class="fish-icon" src="${iconUrl}" alt="${fish.name}" onerror="this.style.display='none'" />
+            <img class="fish-icon" src="${iconUrl}" alt="${fish.name}" loading="lazy" onerror="this.style.display='none'" />
             <div class="fish-name"><span class="fish-name-text">${fish.name}</span>${collectIcon}</div>
             <div class="fish-tags">${timeTag}${weatherTag}</div>
           </div>
@@ -876,15 +912,15 @@
       function withIndicators(iconSrc, fishNode, titleText) {
         const rodName = fishNode && fishNode.rod ? fishNode.rod : '';
         const hookName = fishNode && fishNode.hook ? fishNode.hook : '';
-        const leftCol = `<div class=\"indicator-col\">${rodName ? `<img class=\"rod-icon meta-icon\" src=\"${rodIconFor(rodName)}\" alt=\"${rodName}\"/>` : ''}${hookName ? `<img class=\"hook-icon meta-icon\" src=\"${hookIconFor(hookName)}\" alt=\"${hookName}\"/>` : ''}</div>`;
+        const leftCol = `<div class=\"indicator-col\">${rodName ? `<img class=\"rod-icon meta-icon\" src=\"${rodIconFor(rodName)}\" alt=\"${rodName}\" loading=\"lazy\"/>` : ''}${hookName ? `<img class=\"hook-icon meta-icon\" src=\"${hookIconFor(hookName)}\" alt=\"${hookName}\" loading=\"lazy\"/>` : ''}</div>`;
         const t = titleText || '';
-        return `${leftCol}<img class=\"bait-icon\" src=\"${iconSrc}\" title=\"${t}\" alt=\"${t}\" data-tip=\"${t}\" onerror=\"this.style.display='none'\"/>`;
+        return `${leftCol}<img class=\"bait-icon\" src=\"${iconSrc}\" title=\"${t}\" alt=\"${t}\" data-tip=\"${t}\" loading=\"lazy\" onerror=\"this.style.display='none'\"/>`;
       }
 
       // 直接鱼饵 → 目标鱼
       if (m.type === 'bait') {
         const baitIcon = m.bait ? `./assets/icons/bait/${encodeURIComponent(m.bait)}.png` : '';
-        if (baitIcon) chainParts.push(`<img class=\"bait-icon\" src=\"${baitIcon}\" title=\"${m.bait}\" alt=\"${m.bait}\" data-tip=\"${m.bait}\" onerror=\"this.style.display='none'\"/>`);
+        if (baitIcon) chainParts.push(`<img class=\"bait-icon\" src=\"${baitIcon}\" title=\"${m.bait}\" alt=\"${m.bait}\" data-tip=\"${m.bait}\" loading=\"lazy\" onerror=\"this.style.display='none'\"/>`);
         chainParts.push(`<span class=\"chain-arrow\">›</span>`);
         chainParts.push(withIndicators(iconUrl, fish, fish.name));
         return `<div class=\"method-chain\">${chainParts.join('')}</div>`;
@@ -918,7 +954,7 @@
         for (let i = 0; i < fishesSeq.length; i++) {
           if (i < baits.length) {
             const baitIcon = `./assets/icons/bait/${encodeURIComponent(baits[i])}.png`;
-            chainParts.push(`<img class=\"bait-icon\" src=\"${baitIcon}\" title=\"${baits[i]}\" alt=\"${baits[i]}\" data-tip=\"${baits[i]}\" onerror=\"this.style.display='none'\"/>`);
+            chainParts.push(`<img class=\"bait-icon\" src=\"${baitIcon}\" title=\"${baits[i]}\" alt=\"${baits[i]}\" data-tip=\"${baits[i]}\" loading=\"lazy\" onerror=\"this.style.display='none'\"/>`);
             chainParts.push(`<span class=\"chain-arrow\">›</span>`);
           }
           const fishNameNode = fishesSeq[i];
@@ -1250,7 +1286,7 @@
       const mapImgSrc = `./assets/icons/map/${mapName}.png`;
       const allHeader = `<button class=\"toggle-chip\" id=\"toggleAllBtn\" aria-expanded=\"false\"><span class=\"arrow\">▶</span> 全部钓法</button>`;
       const allBlock = `<div class=\"all-block collapsed\" id=\"allMethods\"><div class=\"method-list\">${list.map(x=>renderMethodChain(x)).join('')}</div></div>`;
-      const mapBlock = `<div class=\"spot-map\">${mapTitle ? `<div class=\"spot-map-title\">地点：${mapTitle}</div>` : ''}<img class=\"spot-map-img\" src=\"${mapImgSrc}\" alt=\"${mapTitle || mapName}\" onerror=\"this.style.display='none'\"/></div>`;
+      const mapBlock = `<div class=\"spot-map\">${mapTitle ? `<div class=\"spot-map-title\">地点：${mapTitle}</div>` : ''}<img class=\"spot-map-img\" src=\"${mapImgSrc}\" alt=\"${mapTitle || mapName}\" loading=\"lazy\" onerror=\"this.style.display='none'\"/></div>`;
       return recommendHeader + recommendBlock + allHeader + allBlock + mapBlock;
     }
 
@@ -1261,24 +1297,24 @@
     const isCompleted = state.completed.has(id);
     const isPinned = state.pinned.has(id);
     const isCollectable = String(fish.collectable || '无').trim() !== '无';
-    const collectBadge = isCollectable ? `<img class=\"collect-badge\" src=\"./assets/icons/others/collection.png\" alt=\"收藏品\" title=\"收藏品：${fish.collectable}\" onerror=\"this.style.display='none'\"/>` : '';
+    const collectBadge = isCollectable ? `<img class=\"collect-badge\" src=\"./assets/icons/others/collection.png\" alt=\"收藏品\" title=\"收藏品：${fish.collectable}\" loading=\"lazy\" onerror=\"this.style.display='none'\"/>` : '';
     const completeIconUrl = './assets/icons/button/complete.png';
     const pinIconUrl = isPinned ? './assets/icons/button/settop_on.png' : './assets/icons/button/settop_off.png';
 
     el.fishDetail.innerHTML = `
       <div class="detail-container">
         <div class="detail-card detail-header">
-          <img class="fish-icon lg" src="${iconUrl}" alt="${fish.name}" onerror="this.style.display='none'" />
+          <img class="fish-icon lg" src="${iconUrl}" alt="${fish.name}" loading="lazy" onerror="this.style.display='none'" />
           <div class="detail-title">${fish.name}${collectBadge}</div>
           <div class="detail-actions">
             <button class="spoil-btn" title="战利品">
-              <img src="./assets/icons/button/spoil.png" alt="战利品" onerror="this.style.display='none'" />
+              <img src="./assets/icons/button/spoil.png" alt="战利品" loading="lazy" onerror="this.style.display='none'" />
             </button>
             <button class="complete-btn ${isCompleted ? 'done' : ''}" data-id="${id}" title="标记完成">
-              <img src="${completeIconUrl}" alt="完成" onerror="this.style.display='none'" />
+              <img src="${completeIconUrl}" alt="完成" loading="lazy" onerror="this.style.display='none'" />
             </button>
             <button class="pin-btn ${isPinned ? 'on' : ''}" data-id="${id}" title="置顶">
-              <img src="${pinIconUrl}" alt="置顶" onerror="this.style.display='none'" />
+              <img src="${pinIconUrl}" alt="置顶" loading="lazy" onerror="this.style.display='none'" />
             </button>
           </div>
         </div>
@@ -1288,13 +1324,13 @@
             <div class="field-row"><span class="tag">等级</span> <strong>${fish.level ?? '—'}</strong></div>
             <div class="field-row"><span class="tag">时间</span> <span class="tag tag-time">${timeText}</span></div>
             <div class="field-row"><span class="tag">天气</span> ${weatherTags || '无'}</div>
-            ${fish.rod ? `<div class="field-row"><span class="tag">杆型</span> <img class="rod-icon meta-icon" style="image-rendering:auto;" src="./assets/icons/type/${rodIconMap[fish.rod] || ''}" alt="${fish.rod}" onerror="this.style.display='none'"/> ${fish.rod}</div>` : ''}
-            ${fish.hook ? `<div class=\"field-row\"><span class=\"tag\">拉杆</span> <img class=\"hook-icon meta-icon\" src=\"./assets/icons/skill/${hookIconMap[fish.hook] || ''}\" alt=\"${fish.hook}\" onerror=\"this.style.display='none'\"/> ${fish.hook}</div>` : ''}
+            ${fish.rod ? `<div class="field-row"><span class="tag">杆型</span> <img class="rod-icon meta-icon" style="image-rendering:auto;" src="./assets/icons/type/${rodIconMap[fish.rod] || ''}" alt="${fish.rod}" loading="lazy" onerror="this.style.display='none'"/> ${fish.rod}</div>` : ''}
+            ${fish.hook ? `<div class=\"field-row\"><span class=\"tag\">拉杆</span> <img class=\"hook-icon meta-icon\" src=\"./assets/icons/skill/${hookIconMap[fish.hook] || ''}\" alt=\"${fish.hook}\" loading=\"lazy\" onerror=\"this.style.display='none'\"/> ${fish.hook}</div>` : ''}
             ${(() => {
               const c = String(fish.collectable || '无').trim();
               if (c === '大地红票' || c === '大地蓝票') {
                 const icon = `./assets/icons/current/${encodeURIComponent(c)}.png`;
-                return `<div class=\"field-row\"><span class=\"tag\">收藏品</span> <img class=\"current-icon meta-icon\" src=\"${icon}\" alt=\"${c}\" onerror=\"this.style.display='none'\"/> ${c}</div>`;
+                return `<div class=\"field-row\"><span class=\"tag\">收藏品</span> <img class=\"current-icon meta-icon\" src=\"${icon}\" alt=\"${c}\" loading=\"lazy\" onerror=\"this.style.display='none'\"/> ${c}</div>`;
               }
               return `<div class=\"field-row\"><span class=\"tag\">收藏品</span> ${c || '无'}</div>`;
             })()}
@@ -1880,13 +1916,20 @@
   }
 
   async function init() {
+    // 立即启用基础功能，避免等待图片加载
     loadPreferences();
     setupEvents();
     updateEorzeaClock();
-    // 简易缓存管理：首屏优先用缓存；每隔10分钟尝试后台刷新数据
+    setInterval(updateEorzeaClock, 1000);
+    
+    // 并行加载关键资源和数据
     try {
-      await loadFishData();
-      setInterval(loadFishData, 10 * 60 * 1000);
+      const [_, __] = await Promise.all([
+        preloadCriticalImages(),
+        loadFishData()
+      ]);
+      // 每隔5分钟刷新数据（减少频率提升性能）
+      setInterval(loadFishData, 5 * 60 * 1000);
     } catch (err) {
       console.error(err);
       el.fishList.innerHTML = `
