@@ -511,6 +511,17 @@
     return state.fish.find(f => f && f.name === name);
   }
 
+  // 将常用图标预加载到内存中（减少首次滚动加载延迟）
+  const imageCache = new Map();
+  function preloadImage(src) {
+    if (!src || imageCache.has(src)) return;
+    const img = new Image();
+    img.decoding = 'async';
+    img.loading = 'eager';
+    img.src = src;
+    imageCache.set(src, img);
+  }
+
   function getFishCountdown(fish) {
     const timeLabel = (!fish.time || fish.time === '无') ? '' : fish.time;
     const weatherLabel = (!fish.weather || fish.weather === '无') ? '' : fish.weather;
@@ -525,7 +536,7 @@
   // ---------- 数据加载与渲染 ----------
   async function loadFishData() {
     const t = Date.now();
-    const res = await fetch(`./assets/fishbook/fish.json?t=${t}`, { cache: 'default' });
+    const res = await fetch(`./assets/fishbook/fish.json`, { cache: 'default' });
     if (!res.ok) throw new Error('Failed to load fish.json');
     state.fish = await res.json();
     // 初始化可用选项（按数据）
@@ -564,7 +575,7 @@
     }
     // 加载钓场 → 用于天气区映射
     try {
-      const rs = await fetch(`./assets/fishbook/spots.json?t=${t}`, { cache: 'default' });
+      const rs = await fetch(`./assets/fishbook/spots.json`, { cache: 'default' });
       if (rs.ok) state.spots = await rs.json();
     } catch (e) { state.spots = []; }
     applyFilter();
@@ -1353,8 +1364,9 @@
     const profilePanel = document.getElementById('userProfile');
     const profileHeader = document.getElementById('userProfileHeader');
     if (profilePanel && profileHeader) {
-      const COLL_KEY = 'mcfisher-profile-collapsed';
-      // 首次默认折叠；有记录则按记录恢复
+      const isMobile = window.matchMedia && window.matchMedia('(max-width: 900px)').matches;
+      const COLL_KEY = isMobile ? 'mcfisher-profile-collapsed-m' : 'mcfisher-profile-collapsed';
+      // 首次默认折叠；有记录则按记录恢复（移动端与桌面端独立记录）
       try {
         const saved = localStorage.getItem(COLL_KEY);
         const shouldCollapse = (saved == null) ? true : saved === '1';
